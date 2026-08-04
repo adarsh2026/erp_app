@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Erp{% end %}
+
+{% block body %}
+<div class="login-screen">
+  <div class="login-card">
+    <div class="login-tag">Erp</div>
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to your account to continue.</p>
+
+    {% if error %}
+    <div class="login-error">{{ error }}</div>
+    {% end %}
+
+    <form method="post" action="/login">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Enter username" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter password" required>
+      </div>
+      
+      <button type="submit" class="login-btn">Login</button>
+    </form>
+
+    <div class="login-foot"></div>
+  </div>
+</div>
+{% end %}

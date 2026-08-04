@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Factory - ErpPro{% end %}
+
+{% block body %}
+<div class="app">
+
+  {% include "partials/sidebar.html" %}
+
+  <div class="main">
+    {% set page_title = "Factory" %}
+    {% include "partials/topbar.html" %}
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h2>Factory</h2>
+          <p>Manage factory master records.</p>
+        </div>
+        <button class="btn-primary" onclick="openModal('newFactoryModal')">+ Add New</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="left"><b>{{ len(factories) }}</b> records</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Location</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if not factories %}
+            <tr>
+              <td colspan="3" style="text-align:center; color:var(--ink-2); padding:32px;">No records yet</td>
+            </tr>
+            {% end %}
+            {% for f in factories %}
+            <tr>
+              <td>{{ f['factory_name'] }}</td>
+              <td>{{ f['factory_location'] if f['factory_location'] else '—' }}</td>
+              <td>
+                <div class="row-actions">
+                  <button type="button"
+                          data-id="{{ f['factory_id'] }}"
+                          data-name="{{ f['factory_name'] }}"
+                          data-location="{{ f['factory_location'] or '' }}"
+                          onclick="openEditModal(this, 'editFactoryModal', 'editFactoryForm', '/master/factory')">
+                    Edit
+                  </button>
+                  <form method="post" action="/master/factory/{{ f['factory_id'] }}/delete" onsubmit="return confirm('Delete this record?');">
+                    <button type="submit" class="reject">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% end %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="newFactoryModal">
+  <div class="modal">
+    <form method="post" action="/master/factory">
+      <h3>New Factory Record</h3>
+      <p class="mhint">Fill in the details to create a new record.</p>
+
+      <div class="field">
+        <label>Name</label>
+        <input type="text" name="name" placeholder="Factory name" required>
+      </div>
+      <div class="field">
+        <label>Location</label>
+        <input type="text" name="location" placeholder="Location">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('newFactoryModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-bg" id="editFactoryModal">
+  <div class="modal">
+    <form method="post" id="editFactoryForm" action="">
+      <h3>Edit Factory Record</h3>
+      <p class="mhint">Update the details and save.</p>
+
+      <div class="field">
+        <label>Name</label>
+        <input type="text" name="name" placeholder="Factory name" required>
+      </div>
+      <div class="field">
+        <label>Location</label>
+        <input type="text" name="location" placeholder="Location">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('editFactoryModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% end %}

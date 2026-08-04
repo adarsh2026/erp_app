@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Store - ErpPro{% end %}
+
+{% block body %}
+<div class="app">
+
+  {% include "partials/sidebar.html" %}
+
+  <div class="main">
+    {% set page_title = "Store" %}
+    {% include "partials/topbar.html" %}
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h2>Store</h2>
+          <p>Manage store master records.</p>
+        </div>
+        <button class="btn-primary" onclick="openModal('newStoreModal')">+ Add New</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="left"><b>{{ len(stores) }}</b> records</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Location</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if not stores %}
+            <tr>
+              <td colspan="3" style="text-align:center; color:var(--ink-2); padding:32px;">No records yet</td>
+            </tr>
+            {% end %}
+            {% for s in stores %}
+            <tr>
+              <td>{{ s['store_name'] }}</td>
+              <td>{{ s['store_location'] if s['store_location'] else '—' }}</td>
+              <td>
+                <div class="row-actions">
+                  <button type="button"
+                          data-id="{{ s['store_id'] }}"
+                          data-name="{{ s['store_name'] }}"
+                          data-location="{{ s['store_location'] or '' }}"
+                          onclick="openEditModal(this, 'editStoreModal', 'editStoreForm', '/master/store')">
+                    Edit
+                  </button>
+                  <form method="post" action="/master/store/{{ s['store_id'] }}/delete" onsubmit="return confirm('Delete this record?');">
+                    <button type="submit" class="reject">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% end %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="newStoreModal">
+  <div class="modal">
+    <form method="post" action="/master/store">
+      <h3>New Store Record</h3>
+      <p class="mhint">Fill in the details to create a new record.</p>
+
+      <div class="field">
+        <label>Name</label>
+        <input type="text" name="name" placeholder="Store name" required>
+      </div>
+      <div class="field">
+        <label>Location</label>
+        <input type="text" name="location" placeholder="Location">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('newStoreModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-bg" id="editStoreModal">
+  <div class="modal">
+    <form method="post" id="editStoreForm" action="">
+      <h3>Edit Store Record</h3>
+      <p class="mhint">Update the details and save.</p>
+
+      <div class="field">
+        <label>Name</label>
+        <input type="text" name="name" placeholder="Store name" required>
+      </div>
+      <div class="field">
+        <label>Location</label>
+        <input type="text" name="location" placeholder="Location">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('editStoreModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% end %}

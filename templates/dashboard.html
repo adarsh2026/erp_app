@@ -1,0 +1,143 @@
+
+
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Erp{% end %}
+
+{% block body %}
+<div class="app">
+
+  {% include "partials/sidebar.html" %}
+
+  <div class="main">
+    {% set page_title = "Dashboard" %}
+    {% include "partials/topbar.html" %}
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h2>Dashboard Overview</h2>
+          <p>Welcome back, {{ user['full_name'] or user['username'] }}.</p>
+        </div>
+      </div>
+
+      {% if has_gmd %}
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="lbl">Factory</div>
+          <div class="val">{{ factory_count }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="lbl">Department</div>
+          <div class="val">{{ department_count }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="lbl">Session</div>
+          <div class="val">{{ session_count }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="lbl">Product</div>
+          <div class="val">{{ product_count }}</div>
+        </div>
+      </div>
+      {% end %}
+
+      <div class="module-entry-grid">
+        {% if has_gmd %}
+        <a href="/master/factory" class="module-entry">
+          <div class="me-body">
+            <h4>General Master Data</h4>
+            <p>Factory, Department, Session, Store, Product and UOM records.</p>
+          </div>
+          <span class="me-arrow">→</span>
+        </a>
+        {% end %}
+
+        {% if has_mm %}
+        <a href="/master/supplier" class="module-entry">
+          <div class="me-body">
+            <h4>Material Management</h4>
+            <p>Master Supplier, Product Category and Product Master records.</p>
+          </div>
+          <span class="me-arrow">→</span>
+        </a>
+        {% end %}
+      </div>
+
+      {% if has_gmd %}
+      <div class="card" style="margin-bottom:22px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <h3 style="margin:0;">General Master Data</h3>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Factory</th>
+                <th>Department</th>
+                <th>Session</th>
+                <th>Product</th>
+                <th>UOM</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if not gmd_rows %}
+              <tr class="empty-row">
+                <td colspan="5">No records yet</td>
+              </tr>
+              {% end %}
+              {% for r in gmd_rows %}
+              <tr>
+                <td>{{ r['factory'] if r['factory'] else '—' }}</td>
+                <td>{{ r['department'] if r['department'] else '—' }}</td>
+                <td>{{ r['session'] if r['session'] else '—' }}</td>
+                <td>{{ r['product'] if r['product'] else '—' }}</td>
+                <td>{{ r['uom'] if r['uom'] else '—' }}</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% end %}
+
+      {% if has_mm %}
+      <div class="card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <h3 style="margin:0;">Material Management</h3>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Master Supplier</th>
+                <th>Product Category</th>
+                <th>Product Master</th>
+                <th>Product</th>
+                <th>UOM</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if not mm_rows %}
+              <tr class="empty-row">
+                <td colspan="5">No records yet</td>
+              </tr>
+              {% end %}
+              {% for r in mm_rows %}
+              <tr>
+                <td>{{ r['supplier'] if r['supplier'] else '—' }}</td>
+                <td>{{ r['category'] if r['category'] else '—' }}</td>
+                <td>{{ r['product_master'] if r['product_master'] else '—' }}</td>
+                <td>{{ r['product'] if r['product'] else '—' }}</td>
+                <td>{{ r['uom'] if r['uom'] else '—' }}</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% end %}
+    </div>
+  </div>
+</div>
+{% end %}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Department - ErpPro{% end %}
+
+{% block body %}
+<div class="app">
+
+  {% include "partials/sidebar.html" %}
+
+  <div class="main">
+    {% set page_title = "Department" %}
+    {% include "partials/topbar.html" %}
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h2>Department</h2>
+          <p>Manage department master records.</p>
+        </div>
+        <button class="btn-primary" onclick="openModal('newDepartmentModal')">+ Add New</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="left"><b>{{ len(departments) }}</b> records</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if not departments %}
+            <tr>
+              <td colspan="2" style="text-align:center; color:var(--ink-2); padding:32px;">No records yet</td>
+            </tr>
+            {% end %}
+            {% for d in departments %}
+            <tr>
+              <td>{{ d['department_name'] }}</td>
+              <td>
+                <div class="row-actions">
+                  <button type="button"
+                          data-id="{{ d['department_id'] }}"
+                          data-name="{{ d['department_name'] }}"
+                          onclick="openEditModal(this, 'editDepartmentModal', 'editDepartmentForm', '/master/department')">
+                    Edit
+                  </button>
+                  <form method="post" action="/master/department/{{ d['department_id'] }}/delete" onsubmit="return confirm('Delete this record?');">
+                    <button type="submit" class="reject">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% end %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="newDepartmentModal">
+  <div class="modal">
+    <form method="post" action="/master/department">
+      <h3>New Department Record</h3>
+      <p class="mhint">Fill in the details to create a new record.</p>
+
+      <div class="field">
+        <label>Name</label>
+        <input type="text" name="name" placeholder="Department name" required>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('newDepartmentModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-bg" id="editDepartmentModal">
+  <div class="modal">
+    <form method="post" id="editDepartmentForm" action="">
+      <h3>Edit Department Record</h3>
+      <p class="mhint">Update the details and save.</p>
+
+      <div class="field">
+        <label>Name</label>
+        <input type="text" name="name" placeholder="Department name" required>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('editDepartmentModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% end %}

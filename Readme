@@ -1,0 +1,38 @@
+# ERP Portal
+A simple ERP web app built with Tornado (Python) and PostgreSQL.
+It has login, an admin panel, and master data pages like Factory,
+Department, Session, Store, Product, UOM, Supplier, Product Category,
+and Product Master.
+
+## Requirements
+- Python 3.9
+- PostgreSQL
+
+## Setup
+1. Install the dependencies:
+
+   pip install -r requirements.txt
+
+2. Create a database named `erp_db` in PostgreSQL.
+3. Update your DB username and password in `db.py` if needed.
+4. Run the migrations to create tables:
+   psql -U postgres -d erp_db -f schema.sql
+5. Create the default users (admin and staff):
+   python seed.py
+6. Start the app:
+   python app.py
+7. Open the app in your browser:
+   http://localhost:8888
+   
+## Default login
+- Adnin — username: `admin`, password: `admin123`
+- Staff — username: `staff`, password: `staff123`
+
+## Project structure
+
+- app.py — starts the server and holds all routes
+- db.py — database connection
+- handlers/ — page logic (one file per module)
+- templates/ — HTML pages
+- static/ — CSS and JS files
+- schema.sql — database tables

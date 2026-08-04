@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Access - ErpPro{% end %}
+
+{% block body %}
+<div class="app">
+
+  {% include "partials/sidebar.html" %}
+
+  <div class="main">
+    {% set page_title = "Manage Access" %}
+    {% include "partials/topbar.html" %}
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h2>Manage Access</h2>
+          <p>Tick the modules each staff member should be able to see.</p>
+        </div>
+        <button class="btn-primary" onclick="openModal('newUserModal')">+ Add New User</button>
+      </div>
+
+      {% if not users %}
+      <div class="card" style="text-align:center; color:var(--ink-2);">
+        No staff users found
+      </div>
+      {% end %}
+
+      {% for u in users %}
+      <div class="card user-access-card" data-user-id="{{ u['user_id'] }}" data-username="{{ u['username'] }}" style="margin-bottom:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+          <div>
+            <div style="font-weight:600;">{{ u['full_name'] or u['username'] }}</div>
+            <div class="code">{{ u['username'] }}</div>
+          </div>
+
+          <div class="form-check-wrap">
+            {% for m in modules %}
+            <label class="form-check-item">
+              <input type="checkbox" class="perm-checkbox" value="{{ m }}"
+                     {% if u['user_id'] in permissions_map and m in permissions_map[u['user_id']] %}checked{% end %}>
+              {{ module_labels[m] }}
+            </label>
+            {% end %}
+          </div>
+
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn-primary btn-sm save-perm-btn">Save</button>
+            <button type="button" class="btn-ghost btn-sm delete-user-btn" style="color:var(--red); border-color:#f3c6c8;">Delete</button>
+            <button type="button" class="btn-ghost btn-sm reset-pwd-btn">Reset Password</button>
+          </div>
+        </div>
+      </div>
+      {% end %}
+    </div>
+  </div>
+</div>
+
+<!-- Add New User Modal -->
+<div class="modal-bg" id="newUserModal">
+  <div class="modal">
+    <form method="post" action="/admin/users" autocomplete="off">
+      {% module xsrf_form_html() %}
+      <h3>Add New User</h3>
+      <p class="mhint">Create a login for a new staff member (or another admin).</p>
+
+      <div class="field">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Enter Username" required minlength="3" maxlength="30" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" name="full_name" placeholder="Full name" required autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="At least 6 characters" minlength="6" required autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label>Role</label>
+        <select name="role" autocomplete="off">
+          {% for r in roles %}
+          <option value="{{ r['role_name'] }}" {% if r['role_name'].lower() == 'staff' or r['role_name'].lower() == 'user' %}selected{% end %}>{{ r['role_name'].capitalize() }}</option>
+          {% end %}
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('newUserModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Create User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-bg" id="resetPasswordModal">
+  <div class="modal">
+    <form method="post" id="resetPasswordForm" action="" autocomplete="off">
+      {% module xsrf_form_html() %}
+      <h3>Reset Password</h3>
+      <p class="mhint">Set a new password for <b id="resetPasswordUsername"></b>. They'll need to use this new password next time they log in.</p>
+
+      <div class="field">
+        <label>New Password</label>
+        <input type="password" name="new_password" id="resetPasswordInput"
+               placeholder="At least 6 characters" minlength="6" required autocomplete="new-password">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('resetPasswordModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Reset Password</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% end %}

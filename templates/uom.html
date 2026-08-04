@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}UOM - ErpPro{% end %}
+
+{% block body %}
+<div class="app">
+
+  {% include "partials/sidebar.html" %}
+
+  <div class="main">
+    {% set page_title = "UOM" %}
+    {% include "partials/topbar.html" %}
+
+    <div class="content">
+      <div class="page-head">
+        <div><h2>UOM</h2><p>Manage UOM master records.</p></div>
+        <button class="btn-primary" onclick="openModal('newUomModal')">+ Add New</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar"><div class="left"><b>{{ len(uoms) }}</b> records</div></div>
+        <table>
+          <thead><tr><th>Name</th><th>Symbol</th><th></th></tr></thead>
+          <tbody>
+            {% if not uoms %}
+            <tr><td colspan="3" style="text-align:center; color:var(--ink-2); padding:32px;">No records yet</td></tr>
+            {% end %}
+            {% for u in uoms %}
+            <tr>
+              <td>{{ u['uom_name'] }}</td>
+              <td class="code">{{ u['uom_symbol'] if u['uom_symbol'] else '—' }}</td>
+              <td>
+                <div class="row-actions">
+                  <button type="button"
+                          data-id="{{ u['uom_id'] }}"
+                          data-name="{{ u['uom_name'] }}"
+                          data-symbol="{{ u['uom_symbol'] or '' }}"
+                          onclick="openEditModal(this, 'editUomModal', 'editUomForm', '/master/uom')">
+                    Edit
+                  </button>
+                  <form method="post" action="/master/uom/{{ u['uom_id'] }}/delete" onsubmit="return confirm('Delete this record?');">
+                    <button type="submit" class="reject">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% end %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="newUomModal">
+  <div class="modal">
+    <form method="post" action="/master/uom">
+      <h3>New UOM Record</h3>
+      <p class="mhint">Fill in the details to create a new record.</p>
+      <div class="field"><label>Name</label><input type="text" name="name" placeholder="UOM name (e.g. Kilogram)" required></div>
+      <div class="field"><label>Symbol</label><input type="text" name="symbol" placeholder="e.g. KG"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('newUomModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-bg" id="editUomModal">
+  <div class="modal">
+    <form method="post" id="editUomForm" action="">
+      <h3>Edit UOM Record</h3>
+      <p class="mhint">Update the details and save.</p>
+      <div class="field"><label>Name</label><input type="text" name="name" placeholder="UOM name (e.g. Kilogram)" required></div>
+      <div class="field"><label>Symbol</label><input type="text" name="symbol" placeholder="e.g. KG"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('editUomModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% end %}

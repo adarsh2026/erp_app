@@ -1,0 +1,55 @@
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+<div class="topbar">
+  <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+
+  <div class="breadcrumb ">Active</div>
+  
+  <div class="topbar-search">
+    <span class="search-icon">⌕</span>
+    <input type="text" class="search-input" placeholder="Search...">
+  </div>
+  
+  <div class="profile-wrap">
+    <button class="profile-btn" id="profileBtn" onclick="toggleProfileMenu()">
+      <div class="avatar">{{ (user['full_name'] or user['username'])[:1].upper() }}</div>
+      <div class="who">
+        <b>{{ user['full_name'] or user['username'] }}</b>
+        <span>{{ user['role'].capitalize() }}</span>
+      </div>
+    </button>
+    <div class="profile-menu" id="profileMenu">
+      <a href="#" onclick="document.getElementById('profileMenu').classList.remove('open'); openModal('changePasswordModal'); return false;">Change Password</a>
+      <a href="/logout">Logout</a>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="changePasswordModal">
+  <div class="modal">
+    <form method="post" action="/change-password">
+      <h3>Change Password</h3>
+      <p class="mhint">Update the password for your account ({{ user['username'] }}).</p>
+
+      <div class="field">
+        <label>Current Password</label>
+        <input type="password" name="current_password" placeholder="Enter current password" required>
+      </div>
+      <div class="field">
+        <label>New Password</label>
+        <input type="password" name="new_password" placeholder="Enter new password" minlength="6" required>
+      </div>
+      <div class="field">
+        <label>Confirm New Password</label>
+        <input type="password" name="confirm_password" placeholder="Re-enter new password" minlength="6" required>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('changePasswordModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Update Password</button>
+      </div>
+    </form>
+  </div>
+</div>

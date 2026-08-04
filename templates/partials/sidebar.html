@@ -1,0 +1,185 @@
+<aside class="sidebar">
+
+    <div class="brand">
+        <div class="mark">E</div>
+        <div class="name">
+            Erp
+            <span>Portal</span>
+        </div>
+    </div>
+
+    <a href="/dashboard"
+       class="nav-top-item {% if handler.request.path == '/dashboard' %}active{% end %}">
+        Dashboard
+    </a>
+
+    {% if user['role'] == 'admin' or 'general_master_data' in permissions %}
+
+    {% set gmd_slugs = [
+        '/master/factory',
+        '/master/department',
+        '/master/session',
+        '/master/store',
+        '/master/product',
+        '/master/uom'
+    ] %}
+
+    {% set gmd_is_active = handler.request.path in gmd_slugs %}
+
+    <div class="nav-group"
+         onmouseenter="openGroup('gmd')"
+         onmouseleave="closeGroup('gmd')">
+
+        <button
+            type="button"
+            class="nav-group-toggle {% if gmd_is_active %}open{% end %}"
+            id="gmd-toggle">
+
+            <span class="nav-group-head">
+                General Master Data
+            </span>
+
+            <span class="chevron">
+                ›
+            </span>
+
+        </button>
+
+        <div
+            class="nav-submenu {% if gmd_is_active %}open{% end %}"
+            id="gmd-submenu">
+
+            <a href="/master/factory"
+               class="nav-item {% if handler.request.path == '/master/factory' %}active{% end %}">
+                Factory
+            </a>
+
+            <a href="/master/department"
+               class="nav-item {% if handler.request.path == '/master/department' %}active{% end %}">
+                Department
+            </a>
+
+            <a href="/master/session"
+               class="nav-item {% if handler.request.path == '/master/session' %}active{% end %}">
+                Session
+            </a>
+
+            <a href="/master/store"
+               class="nav-item {% if handler.request.path == '/master/store' %}active{% end %}">
+                Store
+            </a>
+
+            <a href="/master/product"
+               class="nav-item {% if handler.request.path == '/master/product' %}active{% end %}">
+                Product
+            </a>
+
+            <a href="/master/uom"
+               class="nav-item {% if handler.request.path == '/master/uom' %}active{% end %}">
+                UOM
+            </a>
+
+        </div>
+
+    </div>
+    {% end %}
+
+    {% if user['role'] == 'admin' or 'material_management' in permissions %}
+
+    {% set mm_slugs = [
+        '/master/supplier',
+        '/master/product-category',
+        '/master/product-master'
+    ] %}
+
+    {% set mm_is_active = handler.request.path in mm_slugs %}
+
+    <div class="nav-group"
+         onmouseenter="openGroup('mm')"
+         onmouseleave="closeGroup('mm')">
+
+        <button
+            type="button"
+            class="nav-group-toggle {% if mm_is_active %}open{% end %}"
+            id="mm-toggle">
+
+            <span class="nav-group-head">
+                Material Management
+            </span>
+
+            <span class="chevron">
+                ›
+            </span>
+
+        </button>
+
+        <div
+            class="nav-submenu {% if mm_is_active %}open{% end %}"
+            id="mm-submenu">
+
+            <a href="/master/supplier"
+               class="nav-item {% if handler.request.path == '/master/supplier' %}active{% end %}">
+                Master Supplier
+            </a>
+
+            <a href="/master/product-category"
+               class="nav-item {% if handler.request.path == '/master/product-category' %}active{% end %}">
+                Product Category
+            </a>
+
+            <a href="/master/product-master"
+               class="nav-item {% if handler.request.path == '/master/product-master' %}active{% end %}">
+                Product Master
+            </a>
+        </div>
+
+    </div>
+    {% end %}
+
+    {% if user['role'] == 'admin' %}
+
+    {% set admin_slugs = [
+        '/admin/permissions'
+    ] %}
+
+    {% set admin_is_active = handler.request.path in admin_slugs %}
+
+    <div class="nav-group"
+         onmouseenter="openGroup('admin')"
+         onmouseleave="closeGroup('admin')">
+
+        <button
+            type="button"
+            class="nav-group-toggle {% if admin_is_active %}open{% end %}"
+            id="admin-toggle">
+
+            <span class="nav-group-head">
+                Administration
+            </span>
+
+            <span class="chevron">
+                ›
+            </span>
+
+        </button>
+
+        <div
+            class="nav-submenu {% if admin_is_active %}open{% end %}"
+            id="admin-submenu">
+
+            <a href="/admin/permissions"
+               class="nav-item {% if handler.request.path == '/admin/permissions' %}active{% end %}">
+                Manage Access
+            </a>
+
+        </div>
+
+    </div>
+
+    {% end %}
+
+    <div class="sidebar-foot">
+        SESSION : {{ user['role'].upper() }}
+    </div>
+
+</aside>                                                    

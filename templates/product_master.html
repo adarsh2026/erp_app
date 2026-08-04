@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Product Master - ErpPro{% end %}
+
+{% block body %}
+<div class="app">
+
+  {% include "partials/sidebar.html" %}
+
+  <div class="main">
+    {% set page_title = "Product Master" %}
+    {% include "partials/topbar.html" %}
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h2>Product Master</h2>
+          <p>Manage product master records.</p>
+        </div>
+        <button class="btn-primary" onclick="openModal('newProductMasterModal')">+ Add New</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="left"><b>{{ len(products) }}</b> records</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>UOM</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if not products %}
+            <tr>
+              <td colspan="4" style="text-align:center; color:var(--ink-2); padding:32px;">No records yet</td>
+            </tr>
+            {% end %}
+            {% for p in products %}
+            <tr>
+              <td>{{ p['master_product_name'] }}</td>
+              <td>{{ p['category_name'] if p['category_name'] else '—' }}</td>
+              <td>{{ p['uom_name'] if p['uom_name'] else '—' }}</td>
+              <td>
+                <div class="row-actions">
+                  <button type="button"
+                          data-id="{{ p['product_master_id'] }}"
+                          data-name="{{ p['master_product_name'] }}"
+                          data-category_id="{{ p['category_id'] or '' }}"
+                          data-uom_id="{{ p['uom_id'] or '' }}"
+                          onclick="openEditModal(this, 'editProductMasterModal', 'editProductMasterForm', '/master/product-master')">
+                    Edit
+                  </button>
+                  <form method="post" action="/master/product-master/{{ p['product_master_id'] }}/delete" onsubmit="return confirm('Delete this record?');">
+                    <button type="submit" class="reject">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% end %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="newProductMasterModal">
+  <div class="modal">
+    <form method="post" action="/master/product-master">
+      <h3>New Product Master Record</h3>
+      <p class="mhint">Fill in the details to create a new record.</p>
+
+      <div class="field">
+        <label>Product Name</label>
+        <input type="text" name="name" placeholder="Product name" required>
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select name="category_id" required>
+          <option value="">Select Category</option>
+          {% for c in categories %}
+          <option value="{{ c['product_category_id'] }}">{{ c['category_name'] }}</option>
+          {% end %}
+        </select>
+      </div>
+      <div class="field">
+        <label>UOM</label>
+        <select name="uom_id" required>
+          <option value="">Select UOM</option>
+          {% for u in uoms %}
+          <option value="{{ u['uom_id'] }}">{{ u['uom_name'] }}</option>
+          {% end %}
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('newProductMasterModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-bg" id="editProductMasterModal">
+  <div class="modal">
+    <form method="post" id="editProductMasterForm" action="">
+      <h3>Edit Product Master Record</h3>
+      <p class="mhint">Update the details and save.</p>
+
+      <div class="field">
+        <label>Product Name</label>
+        <input type="text" name="name" placeholder="Product name" required>
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select name="category_id" required>
+          <option value="">Select Category</option>
+          {% for c in categories %}
+          <option value="{{ c['product_category_id'] }}">{{ c['category_name'] }}</option>
+          {% end %}
+        </select>
+      </div>
+      <div class="field">
+        <label>UOM</label>
+        <select name="uom_id" required>
+          <option value="">Select UOM</option>
+          {% for u in uoms %}
+          <option value="{{ u['uom_id'] }}">{{ u['uom_name'] }}</option>
+          {% end %}
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('editProductMasterModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% end %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Session - ErpPro{% end %}
+
+{% block body %}
+<div class="app">
+
+  {% include "partials/sidebar.html" %}
+
+  <div class="main">
+    {% set page_title = "Session" %}
+    {% include "partials/topbar.html" %}
+
+    <div class="content">
+      <div class="page-head">
+        <div><h2>Session</h2><p>Manage session master records.</p></div>
+        <button class="btn-primary" onclick="openModal('newSessionModal')">+ Add New</button>
+      </div>
+      
+      <div class="table-wrap">
+        <div class="table-toolbar"><div class="left"><b>{{ len(sessions) }}</b> records</div></div>
+        <table>
+          <thead><tr><th>Name</th><th>Start Date</th><th>End Date</th><th></th></tr></thead>
+          <tbody>
+            {% if not sessions %}
+            <tr><td colspan="4" style="text-align:center; color:var(--ink-2); padding:32px;">No records yet</td></tr>
+            {% end %}
+            {% for s in sessions %}
+            <tr>
+              <td>{{ s['session_name'] }}</td>
+              <td class="code">{{ s['start_date'].strftime('%d %b %Y') if s['start_date'] else '—' }}</td>
+              <td class="code">{{ s['end_date'].strftime('%d %b %Y') if s['end_date'] else '—' }}</td>
+              <td>
+                <div class="row-actions">
+                  <button type="button"
+                          data-id="{{ s['session_id'] }}"
+                          data-name="{{ s['session_name'] }}"
+                          data-start_date="{{ s['start_date'] }}"
+                          data-end_date="{{ s['end_date'] }}"
+                          onclick="openEditModal(this, 'editSessionModal', 'editSessionForm', '/master/session')">
+                    Edit
+                  </button>
+                  <form method="post" action="/master/session/{{ s['session_id'] }}/delete" onsubmit="return confirm('Delete this record?');">
+                    <button type="submit" class="reject">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% end %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="newSessionModal">
+  <div class="modal">
+    <form method="post" action="/master/session">
+      <h3>New Session Record</h3>
+      <p class="mhint">Fill in the details to create a new record.</p>
+      <div class="field"><label>Name</label><input type="text" name="name" placeholder="Session name" required></div>
+      <div class="field"><label>Start Date</label><input type="date" name="start_date" required></div>
+      <div class="field"><label>End Date</label><input type="date" name="end_date" required></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('newSessionModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-bg" id="editSessionModal">
+  <div class="modal">
+    <form method="post" id="editSessionForm" action="">
+      <h3>Edit Session Record</h3>
+      <p class="mhint">Update the details and save.</p>
+      <div class="field"><label>Name</label><input type="text" name="name" placeholder="Session name" required></div>
+      <div class="field"><label>Start Date</label><input type="date" name="start_date" required></div>
+      <div class="field"><label>End Date</label><input type="date" name="end_date" required></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('editSessionModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% end %}
