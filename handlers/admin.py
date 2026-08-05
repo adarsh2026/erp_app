@@ -14,6 +14,7 @@ MODULE_LABELS = {
 USERNAME_MIN = 3
 USERNAME_MAX = 30
 
+
 def validate_username(value, label="Username"):
     if value is None or value.strip() == "":
         return f"{label} is required."
@@ -25,43 +26,118 @@ def validate_username(value, label="Username"):
     return None
 
 
-async def _is_target_admin(handler, target_user_id):
+async def _get_role_name(handler, target_user_id):
     row = await handler.db.fetchrow(
         "SELECT roles.role_name FROM users "
         "JOIN roles ON users.role_id = roles.role_id "
         "WHERE users.user_id = $1",
         target_user_id,
     )
-    return row is not None and row["role_name"] == "admin"
+    return row["role_name"] if row else None
+
+
+async def _can_manage_target(handler, target_user_id):
+    """
+    True if the logged-in admin/superadmin is allowed to reset/delete/
+    edit-permissions of target_user_id.
+
+    - Nobody can manage their own account here (self-delete/self-reset blocked).
+    - Superadmin can manage any admin or user.
+    - A regular admin can only manage users it created itself.
+    """
+    if int(handler.current_user["id"]) == target_user_id:
+        return False
+
+    target_role = await _get_role_name(handler, target_user_id)
+    if target_role is None:
+        return False
+
+    if handler.is_superadmin():
+        return target_role in ("admin", "user")
+
+    if target_role != "user":
+        return False
+
+    row = await handler.db.fetchrow(
+        "SELECT created_by FROM users WHERE user_id = $1", target_user_id
+    )
+    return row is not None and row["created_by"] == int(handler.current_user["id"])
 
 
 class AdminPermissionsHandler(BaseHandler):
     @authenticated
     async def get(self):
-        if not self.is_admin(): 
+        if not self.is_admin():
             self.redirect("/dashboard")
             return
-        users = await self.db.fetch(
-            "SELECT users.user_id, users.username, users.full_name "
-            "FROM users JOIN roles ON users.role_id = roles.role_id "
-            "WHERE roles.role_name != 'admin' ORDER BY users.username"
-        )
-        perm_rows = await self.db.fetch("SELECT user_id, module_name FROM user_permissions")
-        roles = await self.db.fetch("SELECT role_id, role_name FROM roles ORDER BY role_name")
 
+        perm_rows = await self.db.fetch("SELECT user_id, module_name FROM user_permissions")
         permissions_map = {}
         for row in perm_rows:
             permissions_map.setdefault(row["user_id"], set()).add(row["module_name"])
 
+        roles = await self.db.fetch("SELECT role_id, role_name FROM roles ORDER BY role_name")
+
+        if self.is_superadmin():
+            admins = await self.db.fetch(
+                "SELECT users.user_id, users.username, users.full_name "
+                "FROM users JOIN roles ON users.role_id = roles.role_id "
+                "WHERE roles.role_name = 'admin' ORDER BY users.username"
+            )
+
+            selected_admin_id = self.get_query_argument("admin_id", None)
+            selected_admin = None
+            users = []
+
+            if selected_admin_id:
+                try:
+                    selected_admin_id = int(selected_admin_id)
+                except ValueError:
+                    selected_admin_id = None
+
+            if selected_admin_id:
+                selected_admin = next((a for a in admins if a["user_id"] == selected_admin_id), None)
+
+            if selected_admin:
+                users = await self.db.fetch(
+                    "SELECT user_id, username, full_name FROM users "
+                    "WHERE created_by = $1 ORDER BY username",
+                    selected_admin_id,
+                )
+
+            self.render(
+                "admin_permissions.html",
+                user=self.current_user,
+                is_superadmin=True,
+                admins=admins,
+                selected_admin=selected_admin,
+                users=users,
+                permissions_map=permissions_map,
+                roles=roles,
+                modules=MODULES,
+                module_labels=MODULE_LABELS,
+            )
+            return
+
+        users = await self.db.fetch(
+            "SELECT user_id, username, full_name FROM users "
+            "WHERE created_by = $1 ORDER BY username",
+            int(self.current_user["id"]),
+        )
+
         self.render(
             "admin_permissions.html",
             user=self.current_user,
+            is_superadmin=False,
+            admins=[],
+            selected_admin=None,
             users=users,
             permissions_map=permissions_map,
             roles=roles,
             modules=MODULES,
             module_labels=MODULE_LABELS,
         )
+
 
 class AdminPermissionsUpdateHandler(BaseHandler):
 
@@ -72,9 +148,10 @@ class AdminPermissionsUpdateHandler(BaseHandler):
             return
 
         target_user_id = int(target_user_id)
+        return_url = self.request.headers.get("Referer") or "/admin/permissions"
 
-        if await _is_target_admin(self, target_user_id):
-            self.redirect_with_error("/admin/permissions", "Cannot modify permissions for an admin account.")
+        if not await _can_manage_target(self, target_user_id):
+            self.redirect_with_error(return_url, "You don't have permission to modify this user.")
             return
 
         selected_modules = self.get_body_arguments("modules")
@@ -90,7 +167,7 @@ class AdminPermissionsUpdateHandler(BaseHandler):
                     target_user_id, module,
                 )
 
-        self.redirect("/admin/permissions")
+        self.redirect(return_url)
 
 
 class AdminResetPasswordHandler(BaseHandler):
@@ -101,15 +178,16 @@ class AdminResetPasswordHandler(BaseHandler):
             return
 
         target_user_id = int(target_user_id)
+        return_url = self.request.headers.get("Referer") or "/admin/permissions"
 
-        if await _is_target_admin(self, target_user_id):
-            self.redirect_with_error("/admin/permissions", "Cannot reset the password of an admin account.")
+        if not await _can_manage_target(self, target_user_id):
+            self.redirect_with_error(return_url, "You don't have permission to reset this user's password.")
             return
 
         new_password = self.get_body_argument("new_password", "")
         error = validate_password(new_password, "New password")
         if error:
-            self.redirect_with_error("/admin/permissions", error)
+            self.redirect_with_error(return_url, error)
             return
 
         new_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -119,7 +197,7 @@ class AdminResetPasswordHandler(BaseHandler):
             new_hash, target_user_id,
         )
 
-        self.redirect("/admin/permissions")
+        self.redirect(return_url)
 
 
 class AdminDeleteUserHandler(BaseHandler):
@@ -130,13 +208,14 @@ class AdminDeleteUserHandler(BaseHandler):
             return
 
         target_user_id = int(target_user_id)
+        return_url = self.request.headers.get("Referer") or "/admin/permissions"
 
-        if await _is_target_admin(self, target_user_id):
-            self.redirect_with_error("/admin/permissions", "Cannot delete an admin account.")
+        if not await _can_manage_target(self, target_user_id):
+            self.redirect_with_error(return_url, "You don't have permission to delete this user.")
             return
 
         await self.db.execute("DELETE FROM users WHERE user_id = $1", target_user_id)
-        self.redirect("/admin/permissions")
+        self.redirect(return_url)
 
 
 class AdminCreateUserHandler(BaseHandler):
@@ -146,10 +225,19 @@ class AdminCreateUserHandler(BaseHandler):
             self.redirect("/dashboard")
             return
 
+        return_url = self.request.headers.get("Referer") or "/admin/permissions"
+
         username = self.get_body_argument("username", "").strip()
         full_name = self.get_body_argument("full_name", "").strip()
         password = self.get_body_argument("password", "")
-        role_name = self.get_body_argument("role", "").strip().lower()
+        role_name = self.get_body_argument("role", "user").strip().lower()
+
+        if not self.is_superadmin():
+            role_name = "user"
+
+        if role_name not in ("admin", "user"):
+            self.redirect_with_error(return_url, "Invalid role selected.")
+            return
 
         error = first_error(
             validate_username(username, "Username"),
@@ -157,34 +245,29 @@ class AdminCreateUserHandler(BaseHandler):
             validate_password(password, "Password"),
         )
         if error:
-            self.redirect_with_error("/admin/permissions", error)
+            self.redirect_with_error(return_url, error)
             return
 
         existing = await self.db.fetchrow(
             "SELECT user_id FROM users WHERE username = $1", username
         )
         if existing:
-            self.redirect_with_error("/admin/permissions", "That username is already taken.")
+            self.redirect_with_error(return_url, "That username is already taken.")
             return
 
         role_row = await self.db.fetchrow(
-            "SELECT role_id FROM roles WHERE LOWER(role_name) = LOWER($1)", role_name
+            "SELECT role_id FROM roles WHERE role_name = $1", role_name
         )
         if not role_row:
-            valid_roles = await self.db.fetch("SELECT role_name FROM roles ORDER BY role_name")
-            valid_names = ", ".join(r["role_name"] for r in valid_roles)
-            self.redirect_with_error(
-                "/admin/permissions",
-                f"Invalid role '{role_name}'. Valid roles are: {valid_names}.",
-            )
+            self.redirect_with_error(return_url, f"Role '{role_name}' not found.")
             return
 
         password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
         await self.db.execute(
-            "INSERT INTO users (username, password_hash, full_name, role_id, is_active) "
-            "VALUES ($1, $2, $3, $4, TRUE)",
-            username, password_hash, full_name, role_row["role_id"],
+            "INSERT INTO users (username, password_hash, full_name, role_id, created_by, is_active) "
+            "VALUES ($1, $2, $3, $4, $5, TRUE)",
+            username, password_hash, full_name, role_row["role_id"], int(self.current_user["id"]),
         )
 
-        self.redirect("/admin/permissions")
+        self.redirect(return_url)

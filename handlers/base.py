@@ -40,7 +40,10 @@ class BaseHandler(tornado.web.RequestHandler):
                 self.current_user["role"] = "user"
 
     def is_admin(self):
-        return self.current_user is not None and self.current_user.get("role") == "admin"
+        return self.current_user is not None and self.current_user.get("role") in ("admin", "superadmin")
+
+    def is_superadmin(self):
+        return self.current_user is not None and self.current_user.get("role") == "superadmin"
 
     async def get_permissions(self):
        

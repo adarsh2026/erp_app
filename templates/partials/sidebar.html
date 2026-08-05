@@ -13,7 +13,7 @@
         Dashboard
     </a>
 
-    {% if user['role'] == 'admin' or 'general_master_data' in permissions %}
+    {% if user['role'] in ('admin', 'superadmin') or 'general_master_data' in permissions %}
 
     {% set gmd_slugs = [
         '/master/factory',
@@ -84,7 +84,7 @@
     </div>
     {% end %}
 
-    {% if user['role'] == 'admin' or 'material_management' in permissions %}
+    {% if user['role'] in ('admin', 'superadmin') or 'material_management' in permissions %}
 
     {% set mm_slugs = [
         '/master/supplier',
@@ -136,7 +136,7 @@
     </div>
     {% end %}
 
-    {% if user['role'] == 'admin' %}
+    {% if user['role'] in ('admin', 'superadmin') %}
 
     {% set admin_slugs = [
         '/admin/permissions'
@@ -182,4 +182,4 @@
         SESSION : {{ user['role'].upper() }}
     </div>
 
-</aside>                                                    
+</aside>

@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS roles (
 );
 
 INSERT INTO roles (role_name)
-VALUES ('admin'), ('user')
+VALUES ('superadmin'), ('admin'), ('user')
 ON CONFLICT (role_name) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS users (
@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(100) NOT NULL,
     full_name     VARCHAR(100) NOT NULL,
     role_id       INTEGER      NOT NULL REFERENCES roles(role_id),
+    created_by    INTEGER      REFERENCES users(user_id) ON DELETE SET NULL,
     is_active     BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at    TIMESTAMP    NOT NULL DEFAULT NOW()
 );

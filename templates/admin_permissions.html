@@ -15,14 +15,62 @@
       <div class="page-head">
         <div>
           <h2>Manage Access</h2>
-          <p>Tick the modules each staff member should be able to see.</p>
+          <p>
+            {% if is_superadmin %}
+            Manage admins, and view or manage the users each admin has created.
+            {% else %}
+            Tick the modules each staff member should be able to see.
+            {% end %}
+          </p>
         </div>
-        <button class="btn-primary" onclick="openModal('newUserModal')">+ Add New User</button>
+
+        <div style="display:flex; align-items:center; gap:12px;">
+          {% if is_superadmin %}
+          <select id="adminSelect" onchange="window.location.href='/admin/permissions' + (this.value ? '?admin_id=' + this.value : '');">
+            <option value="">View Admin Data</option>
+            {% for a in admins %}
+            <option value="{{ a['user_id'] }}" {% if selected_admin and selected_admin['user_id'] == a['user_id'] %}selected{% end %}>
+              {{ a['full_name'] or a['username'] }}
+            </option>
+            {% end %}
+          </select>
+          {% end %}
+          <button class="btn-primary" onclick="openModal('newUserModal')">+ Add New User</button>
+        </div>
       </div>
+
+      {% if is_superadmin %}
+
+      <h3 style="margin:0 0 12px;">Admins</h3>
+
+      {% if not admins %}
+      <div class="card" style="text-align:center; color:var(--ink-2); margin-bottom:22px;">
+        No admin users found
+      </div>
+      {% end %}
+
+      {% for a in admins %}
+      <div class="card user-access-card" data-user-id="{{ a['user_id'] }}" data-username="{{ a['username'] }}" style="margin-bottom:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+          <div>
+            <div style="font-weight:600;">{{ a['full_name'] or a['username'] }}</div>
+            <div class="code">{{ a['username'] }}</div>
+          </div>
+
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn-ghost btn-sm delete-user-btn" style="color:var(--red); border-color:#f3c6c8;">Delete</button>
+            <button type="button" class="btn-ghost btn-sm reset-pwd-btn">Reset Password</button>
+          </div>
+        </div>
+      </div>
+      {% end %}
+
+      {% if selected_admin %}
+      <h3 style="margin:22px 0 12px;">Users created by {{ selected_admin['full_name'] or selected_admin['username'] }}</h3>
 
       {% if not users %}
       <div class="card" style="text-align:center; color:var(--ink-2);">
-        No staff users found
+        No staff users found for this admin
       </div>
       {% end %}
 
@@ -52,6 +100,47 @@
         </div>
       </div>
       {% end %}
+
+      {% end %}
+
+      {% end %}
+
+      {% if not is_superadmin %}
+
+        {% if not users %}
+        <div class="card" style="text-align:center; color:var(--ink-2);">
+          No staff users found
+        </div>
+        {% end %}
+
+        {% for u in users %}
+        <div class="card user-access-card" data-user-id="{{ u['user_id'] }}" data-username="{{ u['username'] }}" style="margin-bottom:14px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+            <div>
+              <div style="font-weight:600;">{{ u['full_name'] or u['username'] }}</div>
+              <div class="code">{{ u['username'] }}</div>
+            </div>
+
+            <div class="form-check-wrap">
+              {% for m in modules %}
+              <label class="form-check-item">
+                <input type="checkbox" class="perm-checkbox" value="{{ m }}"
+                       {% if u['user_id'] in permissions_map and m in permissions_map[u['user_id']] %}checked{% end %}>
+                {{ module_labels[m] }}
+              </label>
+              {% end %}
+            </div>
+
+            <div style="display:flex; gap:8px;">
+              <button type="button" class="btn-primary btn-sm save-perm-btn">Save</button>
+              <button type="button" class="btn-ghost btn-sm delete-user-btn" style="color:var(--red); border-color:#f3c6c8;">Delete</button>
+              <button type="button" class="btn-ghost btn-sm reset-pwd-btn">Reset Password</button>
+            </div>
+          </div>
+        </div>
+        {% end %}
+
+      {% end %}
     </div>
   </div>
 </div>
@@ -62,7 +151,13 @@
     <form method="post" action="/admin/users" autocomplete="off">
       {% module xsrf_form_html() %}
       <h3>Add New User</h3>
-      <p class="mhint">Create a login for a new staff member (or another admin).</p>
+      <p class="mhint">
+        {% if is_superadmin %}
+        Create a login for a new admin or staff member.
+        {% else %}
+        Create a login for a new staff member.
+        {% end %}
+      </p>
 
       <div class="field">
         <label>Username</label>
@@ -76,14 +171,16 @@
         <label>Password</label>
         <input type="password" name="password" placeholder="At least 6 characters" minlength="6" required autocomplete="new-password">
       </div>
+
+      {% if is_superadmin %}
       <div class="field">
         <label>Role</label>
         <select name="role" autocomplete="off">
-          {% for r in roles %}
-          <option value="{{ r['role_name'] }}" {% if r['role_name'].lower() == 'staff' or r['role_name'].lower() == 'user' %}selected{% end %}>{{ r['role_name'].capitalize() }}</option>
-          {% end %}
+          <option value="user" selected>User</option>
+          <option value="admin">Admin</option>
         </select>
       </div>
+      {% end %}
 
       <div class="modal-actions">
         <button type="button" class="btn-ghost" onclick="closeModal('newUserModal')">Cancel</button>
