@@ -23,7 +23,7 @@
           <thead><tr><th>Name</th><th>Symbol</th><th></th></tr></thead>
           <tbody>
             {% if not uoms %}
-            <tr><td colspan="3" style="text-align:center; color:var(--ink-2); padding:32px;">No records yet</td></tr>
+            <tr class="empty-row"><td colspan="3">No records yet</td></tr>
             {% end %}
             {% for u in uoms %}
             <tr>
@@ -38,7 +38,7 @@
                           onclick="openEditModal(this, 'editUomModal', 'editUomForm', '/master/uom')">
                     Edit
                   </button>
-                  <form method="post" action="/master/uom/{{ u['uom_id'] }}/delete" onsubmit="return confirm('Delete this record?');">
+                  <form method="post" action="/master/uom/{{ u['uom_id'] }}/delete">
                     <button type="submit" class="reject">Delete</button>
                   </form>
                 </div>

@@ -11,18 +11,18 @@
 </head>
 <body>
 
-<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:#FFFBF9; padding:24px;">
-  <div style="text-align:center; max-width:420px;">
-    <div style="font-family:var(--mono); font-size:20px; font-weight:600; letter-spacing:.1em; color:var(--red); margin-bottom:14px;">
+<div class="error-page">
+  <div class="error-box">
+    <div class="error-code">
       ERROR {{ status_code }}
     </div>
-    <h1 style="font-family:var(--disp); font-size:30px; font-weight:700; color:var(--ink); margin:0 0 10px; letter-spacing:-.01em;">
+    <h1 class="error-title">
       {{ error_title }}
     </h1>
-    <p style="color:var(--ink-2); font-size:15px; margin:0 0 30px; line-height:1.6;">
+    <p class="error-message">
       {{ error_message }}
     </p>
-    <a href="/dashboard" class="login-btn" style="display:inline-block; width:auto; padding:12px 32px; text-decoration:none; box-sizing:border-box;">
+    <a href="/dashboard" class="login-btn error-btn">
       Back to Dashboard
     </a>
   </div>

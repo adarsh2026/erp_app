@@ -77,6 +77,7 @@ class AdminPermissionsHandler(BaseHandler):
             permissions_map.setdefault(row["user_id"], set()).add(row["module_name"])
 
         roles = await self.db.fetch("SELECT role_id, role_name FROM roles ORDER BY role_name")
+        permissions = await self.get_permissions()
 
         if self.is_superadmin():
             admins = await self.db.fetch(
@@ -108,6 +109,7 @@ class AdminPermissionsHandler(BaseHandler):
             self.render(
                 "admin_permissions.html",
                 user=self.current_user,
+                permissions=permissions,
                 is_superadmin=True,
                 admins=admins,
                 selected_admin=selected_admin,
@@ -128,6 +130,7 @@ class AdminPermissionsHandler(BaseHandler):
         self.render(
             "admin_permissions.html",
             user=self.current_user,
+            permissions=permissions,
             is_superadmin=False,
             admins=[],
             selected_admin=None,

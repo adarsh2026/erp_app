@@ -33,8 +33,8 @@
           </thead>
           <tbody>
             {% if not categories %}
-            <tr>
-              <td colspan="2" style="text-align:center; color:var(--ink-2); padding:32px;">No records yet</td>
+            <tr class="empty-row">
+              <td colspan="2">No records yet</td>
             </tr>
             {% end %}
             {% for c in categories %}
@@ -48,7 +48,7 @@
                           onclick="openEditModal(this, 'editCategoryModal', 'editCategoryForm', '/master/product-category')">
                     Edit
                   </button>
-                  <form method="post" action="/master/product-category/{{ c['product_category_id'] }}/delete" onsubmit="return confirm('Delete this record?');">
+                  <form method="post" action="/master/product-category/{{ c['product_category_id'] }}/delete">
                     <button type="submit" class="reject">Delete</button>
                   </form>
                 </div>

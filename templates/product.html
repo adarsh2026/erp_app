@@ -23,7 +23,7 @@
           <thead><tr><th>Name</th><th>Code</th><th></th></tr></thead>
           <tbody>
             {% if not products %}
-            <tr><td colspan="3" style="text-align:center; color:var(--ink-2); padding:32px;">No records yet</td></tr>
+            <tr class="empty-row"><td colspan="3">No records yet</td></tr>
             {% end %}
             {% for p in products %}
             <tr>
@@ -38,7 +38,7 @@
                           onclick="openEditModal(this, 'editProductModal', 'editProductForm', '/master/product')">
                     Edit
                   </button>
-                  <form method="post" action="/master/product/{{ p['product_id'] }}/delete" onsubmit="return confirm('Delete this record?');">
+                  <form method="post" action="/master/product/{{ p['product_id'] }}/delete">
                     <button type="submit" class="reject">Delete</button>
                   </form>
                 </div>
@@ -81,4 +81,4 @@
     </form>
   </div>
 </div>
-{% end %} 
+{% end %}

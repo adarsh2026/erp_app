@@ -15,4 +15,3 @@ async def create_pool():
         max_size=10,
     )
     return pool
-

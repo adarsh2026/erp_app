@@ -6,16 +6,25 @@
 <title>{% block title %}Erp{% end %}</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/style.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+<link rel="preload" as="style"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      media="print" onload="this.media='all'">
+<noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+</noscript>
+
+<link rel="stylesheet" href="/static/css/style.css">
 
 {% block extra_head %}{% end %}
 </head>
 <body>
 {% block body %}{% end %}
 
-<script src="/static/js/app.js"></script>
+<script src="/static/js/app.js" defer></script>
 {% block extra_scripts %}{% end %}
 </body>
 </html>

@@ -24,9 +24,9 @@
           </p>
         </div>
 
-        <div style="display:flex; align-items:center; gap:12px;">
+        <div class="flex-row-12">
           {% if is_superadmin %}
-          <select id="adminSelect" onchange="window.location.href='/admin/permissions' + (this.value ? '?admin_id=' + this.value : '');">
+          <select id="adminSelect" onchange="navigateAdminFilter(this)">
             <option value="">View Admin Data</option>
             {% for a in admins %}
             <option value="{{ a['user_id'] }}" {% if selected_admin and selected_admin['user_id'] == a['user_id'] %}selected{% end %}>
@@ -41,24 +41,24 @@
 
       {% if is_superadmin %}
 
-      <h3 style="margin:0 0 12px;">Admins</h3>
+      <h3 class="section-title">Admins</h3>
 
       {% if not admins %}
-      <div class="card" style="text-align:center; color:var(--ink-2); margin-bottom:22px;">
+      <div class="card card-empty mb-22">
         No admin users found
       </div>
       {% end %}
 
       {% for a in admins %}
-      <div class="card user-access-card" data-user-id="{{ a['user_id'] }}" data-username="{{ a['username'] }}" style="margin-bottom:14px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+      <div class="card user-access-card mb-14" data-user-id="{{ a['user_id'] }}" data-username="{{ a['username'] }}">
+        <div class="flex-between">
           <div>
-            <div style="font-weight:600;">{{ a['full_name'] or a['username'] }}</div>
+            <div class="user-name">{{ a['full_name'] or a['username'] }}</div>
             <div class="code">{{ a['username'] }}</div>
           </div>
 
-          <div style="display:flex; gap:8px;">
-            <button type="button" class="btn-ghost btn-sm delete-user-btn" style="color:var(--red); border-color:#f3c6c8;">Delete</button>
+          <div class="flex-row-8">
+            <button type="button" class="btn-ghost btn-sm delete-user-btn text-danger">Delete</button>
             <button type="button" class="btn-ghost btn-sm reset-pwd-btn">Reset Password</button>
           </div>
         </div>
@@ -66,19 +66,19 @@
       {% end %}
 
       {% if selected_admin %}
-      <h3 style="margin:22px 0 12px;">Users created by {{ selected_admin['full_name'] or selected_admin['username'] }}</h3>
+      <h3 class="section-title-spaced">Users created by {{ selected_admin['full_name'] or selected_admin['username'] }}</h3>
 
       {% if not users %}
-      <div class="card" style="text-align:center; color:var(--ink-2);">
+      <div class="card card-empty">
         No staff users found for this admin
       </div>
       {% end %}
 
       {% for u in users %}
-      <div class="card user-access-card" data-user-id="{{ u['user_id'] }}" data-username="{{ u['username'] }}" style="margin-bottom:14px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+      <div class="card user-access-card mb-14" data-user-id="{{ u['user_id'] }}" data-username="{{ u['username'] }}">
+        <div class="flex-between">
           <div>
-            <div style="font-weight:600;">{{ u['full_name'] or u['username'] }}</div>
+            <div class="user-name">{{ u['full_name'] or u['username'] }}</div>
             <div class="code">{{ u['username'] }}</div>
           </div>
 
@@ -92,9 +92,9 @@
             {% end %}
           </div>
 
-          <div style="display:flex; gap:8px;">
+          <div class="flex-row-8">
             <button type="button" class="btn-primary btn-sm save-perm-btn">Save</button>
-            <button type="button" class="btn-ghost btn-sm delete-user-btn" style="color:var(--red); border-color:#f3c6c8;">Delete</button>
+            <button type="button" class="btn-ghost btn-sm delete-user-btn text-danger">Delete</button>
             <button type="button" class="btn-ghost btn-sm reset-pwd-btn">Reset Password</button>
           </div>
         </div>
@@ -108,16 +108,16 @@
       {% if not is_superadmin %}
 
         {% if not users %}
-        <div class="card" style="text-align:center; color:var(--ink-2);">
+        <div class="card card-empty">
           No staff users found
         </div>
         {% end %}
 
         {% for u in users %}
-        <div class="card user-access-card" data-user-id="{{ u['user_id'] }}" data-username="{{ u['username'] }}" style="margin-bottom:14px;">
-          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+        <div class="card user-access-card mb-14" data-user-id="{{ u['user_id'] }}" data-username="{{ u['username'] }}">
+          <div class="flex-between">
             <div>
-              <div style="font-weight:600;">{{ u['full_name'] or u['username'] }}</div>
+              <div class="user-name">{{ u['full_name'] or u['username'] }}</div>
               <div class="code">{{ u['username'] }}</div>
             </div>
 
@@ -131,9 +131,9 @@
               {% end %}
             </div>
 
-            <div style="display:flex; gap:8px;">
+            <div class="flex-row-8">
               <button type="button" class="btn-primary btn-sm save-perm-btn">Save</button>
-              <button type="button" class="btn-ghost btn-sm delete-user-btn" style="color:var(--red); border-color:#f3c6c8;">Delete</button>
+              <button type="button" class="btn-ghost btn-sm delete-user-btn text-danger">Delete</button>
               <button type="button" class="btn-ghost btn-sm reset-pwd-btn">Reset Password</button>
             </div>
           </div>

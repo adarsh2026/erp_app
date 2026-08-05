@@ -26,6 +26,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+/* ---- Debounce helper ---- */
+function debounce(fn, delay) {
+    var timer = null;
+    return function () {
+        var args = arguments;
+        var ctx = this;
+        clearTimeout(timer);
+        timer = setTimeout(function () { fn.apply(ctx, args); }, delay);
+    };
+}
+
 function showToast(message, type) {
     type = type || 'success';
 
@@ -52,6 +63,18 @@ function showToast(message, type) {
     }, 3000);
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+    var menu = document.getElementById('profileMenu');
+    var link = document.getElementById('changePasswordMenuLink');
+    if (link) {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (menu) menu.classList.remove('open');
+            openModal('changePasswordModal');
+        });
+    }
+});
+
 function toggleProfileMenu() {
     var menu = document.getElementById('profileMenu');
     if (menu) menu.classList.toggle('open');
@@ -70,16 +93,24 @@ function openEditModal(btn, modalId, formId, baseUrl) {
     var form = document.getElementById(formId);
     if (!form) return;
 
-    form.action = baseUrl + '/' + btn.dataset.id + '/edit';
-
+    // Gather everything first (reads), then apply all writes together in one frame
+    // instead of interleaving querySelector reads with value writes per key.
+    var action = baseUrl + '/' + btn.dataset.id + '/edit';
+    var fieldWrites = [];
     Object.keys(btn.dataset).forEach(function (key) {
         if (key === 'id') return;
         var field = form.querySelector('[name="' + key + '"]');
-        if (field) field.value = btn.dataset[key];
+        if (field) fieldWrites.push({ field: field, value: btn.dataset[key] });
     });
 
-    clearFormErrors(form);
-    openModal(modalId);
+    requestAnimationFrame(function () {
+        form.action = action;
+        fieldWrites.forEach(function (item) {
+            item.field.value = item.value;
+        });
+        clearFormErrors(form);
+        openModal(modalId);
+    });
 }
 
 function openModal(id) {
@@ -87,6 +118,7 @@ function openModal(id) {
     if (!modal) return;
     clearFormErrors(modal);
     modal.classList.add('active');
+    document.body.classList.add('scroll-locked');
 }
 
 function closeModal(id) {
@@ -94,9 +126,17 @@ function closeModal(id) {
     if (!modal) return;
     clearFormErrors(modal);
     modal.classList.remove('active');
+    if (!document.querySelector('.modal-bg.active')) {
+        document.body.classList.remove('scroll-locked');
+    }
 }
 
 /* ---- Manage access ---- */
+function navigateAdminFilter(select) {
+    var value = select.value;
+    window.location.href = '/admin/permissions' + (value ? '?admin_id=' + value : '');
+}
+
 function postTo(action, fields) {
     var form = document.createElement('form');
     form.method = 'post';
@@ -126,6 +166,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 fields.push({ name: 'modules', value: cb.value });
             });
 
+            if (btn.disabled) return;
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+
             postTo('/admin/permissions/' + userId, fields);
         });
     });
@@ -139,6 +183,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!confirm('Delete ' + username + '? This removes their login and all granted access permanently.')) {
                 return;
             }
+
+            if (btn.disabled) return;
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
 
             postTo('/admin/users/' + userId + '/delete', []);
         });
@@ -194,6 +242,7 @@ function toggleSidebar() {
 
     sidebar.classList.toggle('open');
     if (backdrop) backdrop.classList.toggle('open');
+    document.body.classList.toggle('scroll-locked', sidebar.classList.contains('open'));
 }
 
 function closeSidebar() {
@@ -201,6 +250,9 @@ function closeSidebar() {
     var backdrop = document.getElementById('sidebarBackdrop');
     if (sidebar) sidebar.classList.remove('open');
     if (backdrop) backdrop.classList.remove('open');
+    if (!document.querySelector('.modal-bg.active')) {
+        document.body.classList.remove('scroll-locked');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -367,7 +419,7 @@ var FIELD_RULES = {
     },
 
     contact_person: function (value) {
-        if (!/^[A-Za-z\s.'-]{2,50}$/.test(value)) {
+        if (!/^[A-Za-z\s.'-]{2,100}$/.test(value)) {
             return 'Only letters allowed (numbers not permitted).';
         }
         if (!/[A-Za-z]/.test(value)) {
@@ -496,14 +548,43 @@ function initTopbarSearch() {
     var table = document.querySelector('.table-wrap table tbody');
     if (!input || !table) return;
 
-    input.addEventListener('input', function () {
+    var ROW_TRANSITION_MS = 160;
+
+    var applyFilter = debounce(function () {
         var q = input.value.trim().toLowerCase();
 
-        table.querySelectorAll('tr').forEach(function (row) {
+        // Read pass first (avoid layout thrashing from interleaved reads/writes)
+        var rows = Array.prototype.map.call(table.querySelectorAll('tr'), function (row) {
             var text = row.textContent.toLowerCase();
-            row.style.display = (q === '' || text.indexOf(q) !== -1) ? '' : 'none';
+            var matches = (q === '' || text.indexOf(q) !== -1);
+            return { row: row, matches: matches };
         });
-    });
+
+        // Write pass
+        rows.forEach(function (item) {
+            var row = item.row;
+            if (item.matches) {
+                if (row.style.display === 'none') row.style.display = '';
+                // allow display to apply before removing the class so the fade-in plays
+                requestAnimationFrame(function () {
+                    row.classList.remove('row-filtered-out');
+                });
+            } else {
+                if (!row.classList.contains('row-filtered-out')) {
+                    row.classList.add('row-filtered-out');
+                    setTimeout(function () {
+                        if (row.classList.contains('row-filtered-out')) {
+                            row.style.display = 'none';
+                        }
+                    }, ROW_TRANSITION_MS);
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    }, 180);
+
+    input.addEventListener('input', applyFilter);
 }
 
 document.addEventListener('DOMContentLoaded', initTopbarSearch);
@@ -529,8 +610,18 @@ document.addEventListener('DOMContentLoaded', function () {
         var action = form.getAttribute('action') || '';
 
         if (action.indexOf('/delete') !== -1) {
-            form.addEventListener('submit', function () {
+            form.addEventListener('submit', function (e) {
+                if (!confirm('Delete this record?')) {
+                    e.preventDefault();
+                    return;
+                }
                 sessionStorage.setItem('pendingToast', 'Record deleted successfully!');
+
+                var delBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+                if (delBtn && !delBtn.disabled) {
+                    delBtn.classList.add('btn-loading');
+                    delBtn.disabled = true;
+                }
             });
             return;
         }
@@ -561,10 +652,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (isLoginForm) {
                 sessionStorage.setItem('justLoggedIn', '1');
-                return;
+            } else {
+                sessionStorage.setItem('pendingToast', getSuccessMessage(action));
             }
 
-            sessionStorage.setItem('pendingToast', getSuccessMessage(action));
+            var submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+            if (submitBtn && !submitBtn.disabled) {
+                submitBtn.classList.add('btn-loading');
+                submitBtn.disabled = true;
+            }
         });
 
         form.querySelectorAll('input, select').forEach(function (field) {

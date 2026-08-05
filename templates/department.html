@@ -33,8 +33,8 @@
           </thead>
           <tbody>
             {% if not departments %}
-            <tr>
-              <td colspan="2" style="text-align:center; color:var(--ink-2); padding:32px;">No records yet</td>
+            <tr class="empty-row">
+              <td colspan="2">No records yet</td>
             </tr>
             {% end %}
             {% for d in departments %}
@@ -48,7 +48,7 @@
                           onclick="openEditModal(this, 'editDepartmentModal', 'editDepartmentForm', '/master/department')">
                     Edit
                   </button>
-                  <form method="post" action="/master/department/{{ d['department_id'] }}/delete" onsubmit="return confirm('Delete this record?');">
+                  <form method="post" action="/master/department/{{ d['department_id'] }}/delete">
                     <button type="submit" class="reject">Delete</button>
                   </form>
                 </div>

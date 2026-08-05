@@ -34,8 +34,8 @@
           </thead>
           <tbody>
             {% if not factories %}
-            <tr>
-              <td colspan="3" style="text-align:center; color:var(--ink-2); padding:32px;">No records yet</td>
+            <tr class="empty-row">
+              <td colspan="3">No records yet</td>
             </tr>
             {% end %}
             {% for f in factories %}
@@ -51,7 +51,7 @@
                           onclick="openEditModal(this, 'editFactoryModal', 'editFactoryForm', '/master/factory')">
                     Edit
                   </button>
-                  <form method="post" action="/master/factory/{{ f['factory_id'] }}/delete" onsubmit="return confirm('Delete this record?');">
+                  <form method="post" action="/master/factory/{{ f['factory_id'] }}/delete">
                     <button type="submit" class="reject">Delete</button>
                   </form>
                 </div>

@@ -35,8 +35,8 @@
           </thead>
           <tbody>
             {% if not suppliers %}
-            <tr>
-              <td colspan="4" style="text-align:center; color:var(--ink-2); padding:32px;">No records yet</td>
+            <tr class="empty-row">
+              <td colspan="4">No records yet</td>
             </tr>
             {% end %}
             {% for s in suppliers %}
@@ -54,7 +54,7 @@
                           onclick="openEditModal(this, 'editSupplierModal', 'editSupplierForm', '/master/supplier')">
                     Edit
                   </button>
-                  <form method="post" action="/master/supplier/{{ s['supplier_id'] }}/delete" onsubmit="return confirm('Delete this record?');">
+                  <form method="post" action="/master/supplier/{{ s['supplier_id'] }}/delete">
                     <button type="submit" class="reject">Delete</button>
                   </form>
                 </div>
