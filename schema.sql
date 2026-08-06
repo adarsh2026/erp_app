@@ -1,3 +1,12 @@
+-- ============================================================
+-- schema.sql — CONSOLIDATED SNAPSHOT ONLY.
+-- This file is NOT run directly by the app; it mirrors the
+-- current end-state of migrations/001_create_roles.sql through
+-- migrations/013_add_superadmin.sql for quick reference / fresh
+-- local setup. The migrations folder is the source of truth.
+-- Whenever a new migration is added, update this file to match.
+-- ============================================================
+
 CREATE TABLE IF NOT EXISTS roles (
     role_id     SERIAL PRIMARY KEY,
     role_name   VARCHAR(30) UNIQUE NOT NULL

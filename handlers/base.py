@@ -71,9 +71,9 @@ class BaseHandler(tornado.web.RequestHandler):
         }
         title, message = pages.get(
             status_code, ("Error", "Something went wrong. Please try again.")
-        )
+        )   
 
-        self.render(
+        self.render(    
             "error.html",
             status_code=status_code,
             error_title=title,

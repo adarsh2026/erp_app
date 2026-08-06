@@ -12,7 +12,7 @@
     <input type="text" class="search-input" placeholder="Search...">
   </div>
   
-  <div class="profile-wrap">
+  <div class="profile-wrap" onmouseleave="closeProfileMenu()">
     <button class="profile-btn" id="profileBtn" onclick="toggleProfileMenu()">
       <div class="avatar">{{ (user['full_name'] or user['username'])[:1].upper() }}</div>
       <div class="who">

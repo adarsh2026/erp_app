@@ -52,6 +52,13 @@ class ProductMasterHandler(BaseHandler):
             self.redirect_with_error("/master/product-master", error)
             return
 
+        dup = await self.db.fetchrow(
+            "SELECT product_master_id FROM product_master WHERE master_product_name = $1", name
+        )
+        if dup:
+            self.redirect_with_error("/master/product-master", "A product with this name already exists.")
+            return
+
         await self.db.execute(
             "INSERT INTO product_master (master_product_name, product_category_id, uom_id) VALUES ($1, $2, $3)",
             name, int(category_id), int(uom_id),
@@ -82,6 +89,14 @@ class ProductMasterEditHandler(BaseHandler):
         )
         if error:
             self.redirect_with_error("/master/product-master", error)
+            return
+
+        dup = await self.db.fetchrow(
+            "SELECT product_master_id FROM product_master WHERE master_product_name = $1 AND product_master_id != $2",
+            name, int(item_id),
+        )
+        if dup:
+            self.redirect_with_error("/master/product-master", "A product with this name already exists.")
             return
 
         await self.db.execute(

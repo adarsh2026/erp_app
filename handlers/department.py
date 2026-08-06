@@ -52,7 +52,7 @@ class DepartmentEditHandler(BaseHandler):
         if not _has_access(self, permissions):
             self.redirect("/dashboard")
             return
-
+        
         existing = await self.db.fetchrow("SELECT department_id FROM departments WHERE department_id = $1", int(item_id))
         if not existing:
             self.redirect_with_error("/master/department", "Department record not found.")
@@ -78,7 +78,6 @@ class DepartmentEditHandler(BaseHandler):
         )
         self.redirect("/master/department")
 
-
 class DepartmentDeleteHandler(BaseHandler):
     @authenticated
     async def post(self, item_id):
@@ -93,4 +92,4 @@ class DepartmentDeleteHandler(BaseHandler):
             return
 
         await self.db.execute("DELETE FROM departments WHERE department_id = $1", int(item_id))
-        self.redirect("/master/department")
+        self.redirect("/master/department")                                                                             

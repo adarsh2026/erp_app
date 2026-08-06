@@ -1,5 +1,5 @@
 import re
-NAME_RE = re.compile(r"^[A-Za-z\s.'&-]{2,100}$")
+NAME_RE = re.compile(r"^[A-Za-z0-9\s.'&-]{2,100}$")
 PERSON_NAME_RE = re.compile(r"^[A-Za-z\s.'-]{2,100}$")
 CODE_RE = re.compile(r"^[A-Za-z0-9\-_]{1,20}$")
 SYMBOL_RE = re.compile(r"^[A-Za-z]{1,10}$")

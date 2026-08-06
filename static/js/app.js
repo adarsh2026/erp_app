@@ -80,12 +80,17 @@ function toggleProfileMenu() {
     if (menu) menu.classList.toggle('open');
 }
 
+function closeProfileMenu() {
+    var menu = document.getElementById('profileMenu');
+    if (menu) menu.classList.remove('open');
+}
+
 document.addEventListener('click', function (e) {
     var menu = document.getElementById('profileMenu');
     var btn = document.getElementById('profileBtn');
 
     if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
-        menu.classList.remove('open');
+        closeProfileMenu();
     }
 });
 
@@ -364,7 +369,7 @@ function validateSessionDates(form) {
 
 var INPUT_FILTERS = {
     name: function (value) {
-        return value.replace(/[^A-Za-z\s.'&-]/g, '');
+        return value.replace(/[^A-Za-z0-9\s.'&-]/g, '');
     },
 
     contact_person: function (value) {
@@ -460,8 +465,8 @@ var FIELD_RULES = {
     },
 
     name: function (value) {
-        if (!/^[A-Za-z\s.'&-]{2,100}$/.test(value)) {
-            return 'Only letters allowed (numbers not permitted).';
+        if (!/^[A-Za-z0-9\s.'&-]{2,100}$/.test(value)) {
+            return 'Only letters, numbers, spaces and . \' & - are allowed.';
         }
         if (!/[A-Za-z]/.test(value)) {
             return 'Must contain at least one letter.';
